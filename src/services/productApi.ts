@@ -1,5 +1,4 @@
 import { apiClient } from './apiClient';
-import { PRICE_MULTIPLIER } from '@constants/student';
 
 export interface RawProduct {
   id: number;
@@ -15,49 +14,153 @@ export interface Product {
   originalId: number;
   title: string;
   rawPrice: number;
-  price: number; // multiplied price
+  price: number;
   formattedPrice: string;
   description: string;
   category: string;
   image: string;
 }
 
-// Vietnamese titles matching exam screenshots (Hình 2 & Hình 4)
-const VN_PRODUCT_NAMES: Record<number, { title: string; image: string }> = {
-  1: { title: 'Cơm nắm rong biển', image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400' },
-  2: { title: 'Trà sữa trân châu', image: 'https://images.unsplash.com/photo-1558857563-b371033873b8?w=400' },
-  3: { title: 'Bút bi X-Gel', image: 'https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=400' },
-  4: { title: 'Mì ly ăn liền KTX', image: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400' },
-  5: { title: 'Bánh mì chả lụa', image: 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=400' },
-  6: { title: 'Nước suối 500ml', image: 'https://images.unsplash.com/photo-1523362628745-0c100150b504?w=400' },
-  7: { title: 'Tập học sinh 200 trang', image: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400' },
-  8: { title: 'Cà phê muối KTX', image: 'https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=400' },
-  9: { title: 'Snack khoai tây', image: 'https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=400' },
-  10: { title: 'Sữa tươi tiệt trùng', image: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400' },
-  11: { title: 'Khăn giấy bỏ túi', image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400' },
-  12: { title: 'Bút highlight dạ quang', image: 'https://images.unsplash.com/photo-1585336261026-91e03189913e?w=400' },
-};
+// Danh sách 12 món ăn Việt Nam truyền thống & phổ biến cho sinh viên KTX (Giá hợp lý: 18.000đ - 40.000đ)
+export const VN_FOOD_PRODUCTS: Array<{
+  id: number;
+  title: string;
+  basePrice: number;
+  category: string;
+  description: string;
+  image: string;
+}> = [
+  {
+    id: 1,
+    title: 'Bánh mì đặc biệt KTX',
+    basePrice: 25000,
+    category: 'Món chính',
+    description: 'Bánh mì giòn rụm kẹp pa tê thơm lừng, thịt chả lụa, dưa leo và rau ngò tươi.',
+    image: 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=500&auto=format&fit=crop',
+  },
+  {
+    id: 2,
+    title: 'Phở bò Tái Nạm',
+    basePrice: 35000,
+    category: 'Món nước',
+    description: 'Phở bò truyền thống nước dùng hầm xương ngọt thanh, thịt bò tươi mềm dai ngon.',
+    image: 'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=500&auto=format&fit=crop',
+  },
+  {
+    id: 3,
+    title: 'Cơm tấm Sườn Bì Chả',
+    basePrice: 35000,
+    category: 'Món chính',
+    description: 'Cơm tấm hạt dẻo thơm, sườn nướng mật ong đậm đà kết hợp chả trứng béo ngậy.',
+    image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop',
+  },
+  {
+    id: 4,
+    title: 'Bún bò Huế đặc biệt',
+    basePrice: 40000,
+    category: 'Món nước',
+    description: 'Bún bò chuẩn vị xứ Huế, nước dùng sa tế cay nồng thơm mùi sả, thịt nạm giòn.',
+    image: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=500&auto=format&fit=crop',
+  },
+  {
+    id: 5,
+    title: 'Trà sữa Trân châu Đường đen',
+    basePrice: 25000,
+    category: 'Đồ uống',
+    description: 'Trà sữa béo ngậy mát lạnh, hạt trân châu đường đen dẻo thơm ngạt ngào.',
+    image: 'https://images.unsplash.com/photo-1558857563-b371033873b8?w=500&auto=format&fit=crop',
+  },
+  {
+    id: 6,
+    title: 'Bún đậu Mắm tôm KTX',
+    basePrice: 39000,
+    category: 'Món chính',
+    description: 'Bún đậu đầy đủ chả cốm giòn tan, nem chua nướng, thịt luộc kèm mắm tôm đậm đà.',
+    image: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=500&auto=format&fit=crop',
+  },
+  {
+    id: 7,
+    title: 'Cà phê Muối KTX',
+    basePrice: 20000,
+    category: 'Đồ uống',
+    description: 'Cà phê pha phin thơm lừng kết hợp lớp kem mặn béo ngậy đặc trưng KTX.',
+    image: 'https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=500&auto=format&fit=crop',
+  },
+  {
+    id: 8,
+    title: 'Gỏi cuốn Tôm Thịt (3 cuốn)',
+    basePrice: 25000,
+    category: 'Ăn vặt',
+    description: 'Gỏi cuốn tôm tươi, thịt luộc, bún tươi và rau thơm chấm sốt tương bơ đậu phụng.',
+    image: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=500&auto=format&fit=crop',
+  },
+  {
+    id: 9,
+    title: 'Hủ tiếu Nam Vang',
+    basePrice: 35000,
+    category: 'Món nước',
+    description: 'Hủ tiếu Nam Vang thơm ngon với tôm tươi, thịt băm, trứng cút và nước dùng đậm đà.',
+    image: 'https://images.unsplash.com/photo-1617093727343-374698b1b08d?w=500&auto=format&fit=crop',
+  },
+  {
+    id: 10,
+    title: 'Bánh bao Nhân thịt Trứng cút',
+    basePrice: 18000,
+    category: 'Ăn vặt',
+    description: 'Bánh bao nóng hổi vỏ xốp mịn, nhân thịt mộc nhĩ đẫm đà kèm 2 trứng cút béo bùi.',
+    image: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?w=500&auto=format&fit=crop',
+  },
+  {
+    id: 11,
+    title: 'Mì trộn Trứng muối Xúc xích',
+    basePrice: 28000,
+    category: 'Món chính',
+    description: 'Mì trộn sốt trứng muối ngậy béo bơ tỏi, kèm xúc xích nướng vàng ươm thơm phức.',
+    image: 'https://images.unsplash.com/photo-1612927601601-6638404737ce?w=500&auto=format&fit=crop',
+  },
+  {
+    id: 12,
+    title: 'Nước cam Tươi ép 500ml',
+    basePrice: 20000,
+    category: 'Đồ uống',
+    description: 'Cam sành vắt tươi 100% ngọt mát tự nhiên, bổ sung vitamin C năng lượng.',
+    image: 'https://images.unsplash.com/photo-1613478223719-2ab802602423?w=500&auto=format&fit=crop',
+  },
+];
 
 export async function fetchProducts(): Promise<Product[]> {
-  const response = await apiClient.get<RawProduct[]>('/products?limit=12');
-  const data = response.data;
+  try {
+    const response = await apiClient.get<RawProduct[]>('/products?limit=12').catch(() => null);
+    const apiData = response?.data;
 
-  return data.map((item) => {
-    const vnInfo = VN_PRODUCT_NAMES[item.id] || { title: item.title, image: item.image };
-    // Base unit price scaled cleanly
-    const calculatedPrice = Math.round((item.price / 10) * PRICE_MULTIPLIER);
-    const formattedPrice = `${calculatedPrice.toLocaleString('vi-VN')} đ`;
+    return VN_FOOD_PRODUCTS.map((vnItem, index) => {
+      const rawItem = apiData && apiData[index] ? apiData[index] : null;
+      const finalPrice = vnItem.basePrice;
+      const formattedPrice = `${finalPrice.toLocaleString('vi-VN')} đ`;
 
-    return {
-      id: String(item.id),
-      originalId: item.id,
-      title: vnInfo.title,
-      rawPrice: item.price,
-      price: calculatedPrice,
-      formattedPrice,
-      description: item.description || 'Giao nội khu - nhận tận phòng ký túc xá. Đồ tươi ngon, phục vụ nhanh chóng.',
-      category: item.category,
-      image: item.image || vnInfo.image,
-    };
-  });
+      return {
+        id: String(vnItem.id),
+        originalId: vnItem.id,
+        title: vnItem.title,
+        rawPrice: rawItem ? rawItem.price : vnItem.basePrice / 1000,
+        price: finalPrice,
+        formattedPrice,
+        description: vnItem.description,
+        category: vnItem.category,
+        image: vnItem.image,
+      };
+    });
+  } catch (error) {
+    return VN_FOOD_PRODUCTS.map((vnItem) => ({
+      id: String(vnItem.id),
+      originalId: vnItem.id,
+      title: vnItem.title,
+      rawPrice: vnItem.basePrice / 1000,
+      price: vnItem.basePrice,
+      formattedPrice: `${vnItem.basePrice.toLocaleString('vi-VN')} đ`,
+      description: vnItem.description,
+      category: vnItem.category,
+      image: vnItem.image,
+    }));
+  }
 }

@@ -77,9 +77,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.shopai"
+    namespace "com.ktxgo"
     defaultConfig {
-        applicationId "com.shopai"
+        applicationId "com.ktxgo"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
@@ -116,5 +116,4 @@ dependencies {
     } else {
         implementation jscFlavor
     }
-}
 }

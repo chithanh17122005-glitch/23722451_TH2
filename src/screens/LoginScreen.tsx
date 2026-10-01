@@ -19,7 +19,7 @@ export const LoginScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={styles.container}
       >
         {VARIANT.watermarkAtTop && <Watermark position="top" />}

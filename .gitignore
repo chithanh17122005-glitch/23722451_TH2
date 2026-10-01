@@ -5,3 +5,9 @@ node_modules/
 .vscode/
 android/app/build/
 ios/build/
+
+# Android generated files
+android/.gradle/
+android/.cxx/
+android/build/
+android/app/.cxx/
